@@ -116,10 +116,12 @@ function generateMessageFiles(
     messageDescriptor,
     parentMessageDescriptors
   );
+  let syntax = fileDescriptor.getSyntax() ?? "proto2";
   const outputFileContext = new FileContext(
     outputFilePath,
     generatorContext,
-    fileDescriptor
+    fileDescriptor,
+    syntax
   );
 
   const messageCode = generateMessage(
@@ -177,10 +179,13 @@ function generateEnumFile(
     enumDescriptor,
     parentMessageDescriptors
   );
+
+  let syntax = fileDescriptor.getSyntax() ?? "proto2";
   const outputFileContext = new FileContext(
     outputFilePath,
     generatorContext,
-    fileDescriptor
+    fileDescriptor,
+    syntax
   );
 
   const enumCode = generateEnum(enumDescriptor, outputFileContext);

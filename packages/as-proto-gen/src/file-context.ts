@@ -12,20 +12,27 @@ export class FileContext {
   private readonly registeredImports: Map<string, Map<string, string>> =
     new Map();
   private readonly registeredDefinitions: Set<string> = new Set();
+  private readonly syntax:string;
 
   constructor(
     filePath: string,
     generatorContext: GeneratorContext,
-    fileDescriptor: FileDescriptorProto
+    fileDescriptor: FileDescriptorProto,
+    syntax: string
   ) {
     this.filePath = filePath;
     this.generatorContext = generatorContext;
     this.fileDescriptor = fileDescriptor;
     this.moduleScopeContext = new ScopeContext(this);
+    this.syntax = syntax;
   }
 
   getFilePath(): string {
     return this.filePath;
+  }
+
+  getSyntax(): string {
+    return this.syntax;
   }
 
   getGeneratorContext(): GeneratorContext {

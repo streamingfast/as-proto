@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package asproto.test;
+
+message TestRepeated {
+    repeated int32 extend_unset_repeated_int32 = 1;
+    repeated int32 extend_packed_repeated_int32 = 2 [packed = true];
+    repeated int32 extend_notpacked_repeated_int32 = 3 [packed = false];
+}

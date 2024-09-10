@@ -18,7 +18,7 @@ export function generateFieldEncodeInstruction(
 ): string {
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
   const isMessage = fieldDescriptor.getType() === Type.TYPE_MESSAGE;
-  const isPacked = fieldDescriptor.getOptions()?.hasPacked();
+  const isPacked = fieldDescriptor.getOptions()?.getPacked() ?? (isRepeated && scopeContext.getFileContext().getSyntax() === "proto3");
 
   const fieldTag = getFieldTag(fieldDescriptor);
   const fieldName = generateFieldName(fieldDescriptor);
@@ -158,7 +158,7 @@ export function generateFieldDecodeInstruction(
 ): string {
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
   const isMessage = fieldDescriptor.getType() === Type.TYPE_MESSAGE;
-  const isPacked = fieldDescriptor.getOptions()?.hasPacked();
+  const isPacked = fieldDescriptor.getOptions()?.getPacked() ?? (isRepeated && scopeContext.getFileContext().getSyntax() === "proto3");
 
   const fieldNumber = fieldDescriptor.getNumber();
   assert.ok(fieldNumber !== undefined);
