@@ -18,7 +18,9 @@ export function generateFieldEncodeInstruction(
 ): string {
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
   const isMessage = fieldDescriptor.getType() === Type.TYPE_MESSAGE;
-  const isPacked = fieldDescriptor.getOptions()?.getPacked() ?? (isRepeated && scopeContext.getFileContext().getSyntax() === "proto3");
+  const isPacked = fieldDescriptor.getOptions()?.getPacked() ?? (
+    isRepeated && scopeContext.getFileContext().getSyntax() === "proto3" && isDefaultPackedInProto3(fieldDescriptor)
+  );
 
   const fieldTag = getFieldTag(fieldDescriptor);
   const fieldName = generateFieldName(fieldDescriptor);
@@ -158,7 +160,9 @@ export function generateFieldDecodeInstruction(
 ): string {
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
   const isMessage = fieldDescriptor.getType() === Type.TYPE_MESSAGE;
-  const isPacked = fieldDescriptor.getOptions()?.getPacked() ?? (isRepeated && scopeContext.getFileContext().getSyntax() === "proto3");
+  const isPacked = fieldDescriptor.getOptions()?.getPacked() ?? (
+    isRepeated && scopeContext.getFileContext().getSyntax() === "proto3" && isDefaultPackedInProto3(fieldDescriptor)
+  );
 
   const fieldNumber = fieldDescriptor.getNumber();
   assert.ok(fieldNumber !== undefined);
@@ -266,7 +270,8 @@ export function generateFieldDecodeInstruction(
     } else if (isRepeated && isPacked) {
       return `
         case ${fieldNumber}:
-          for (const end: usize = reader.ptr + reader.uint32(); reader.ptr < end;) {
+          const length: i32 = reader.uint32();
+          for (const end: usize = reader.ptr + length; reader.ptr < end;) {
             message.${fieldName}.push(${decodeInstruction()});
           }
           break;
@@ -288,7 +293,8 @@ export function generateFieldDecodeInstruction(
     if (isRepeated && isPacked) {
       return `
         case ${fieldNumber}:
-          for (const end: usize = reader.ptr + reader.uint32(); reader.ptr < end;) {
+          const length: i32 = reader.uint32();
+          for (const end: usize = reader.ptr + length; reader.ptr < end;) {
             message.${fieldName}.push(${decodeInstruction()});
           }
           break;
@@ -316,6 +322,31 @@ export function generateFieldName(
   assert.ok(fieldName);
 
   return camelize(fieldName);
+}
+
+export function isDefaultPackedInProto3(
+  fieldDescriptor: FieldDescriptorProto
+): boolean {
+  // from https://protobuf.dev/programming-guides/encoding/#packed referencing 
+  // "any scalar type that is not string or bytes"
+  // (https://protobuf.dev/programming-guides/proto2/#scalar)
+  switch (fieldDescriptor.getType()) {
+    case Type.TYPE_INT32:
+    case Type.TYPE_SINT32:
+    case Type.TYPE_FIXED32:
+    case Type.TYPE_SFIXED32:
+    case Type.TYPE_UINT32:
+    case Type.TYPE_INT64:
+    case Type.TYPE_SINT64:
+    case Type.TYPE_FIXED64:
+    case Type.TYPE_SFIXED64:
+    case Type.TYPE_UINT64:
+    case Type.TYPE_FLOAT:
+    case Type.TYPE_DOUBLE:
+    case Type.TYPE_BOOL:
+      return true;
+  }
+  return false;
 }
 
 export function generateFieldTypeBasic(

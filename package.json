@@ -30,7 +30,7 @@
     "benchmark": "^2.1.4",
     "chalk": "^4.0.0",
     "fs-extra": "^10.1.0",
-    "lerna": "^5.1.6",
+    "lerna": "^6.0.0",
     "prettier": "^2.5.0",
     "protobufjs": "^6.11.2",
     "rimraf": "^3.0.2",
